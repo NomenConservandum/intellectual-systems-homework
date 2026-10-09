@@ -1,0 +1,1 @@
+calc(X, Y):-Res is (X + Y) / 2, write(Res).
