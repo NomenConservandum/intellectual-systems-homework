@@ -1,1 +1,2 @@
-calc(X):-X\==2, Res is (X*X+1)/(X-2), (write("Y: "), write(Res)) ; write("DIVISION BY ZERO!").
+calc(X):-(X==2, write("DIVISION BY ZERO!"), !) ;
+    (Res is (X*X+1)/(X-2), write("Y: "), write(Res)).
