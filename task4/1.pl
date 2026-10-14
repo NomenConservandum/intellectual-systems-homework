@@ -1,3 +1,2 @@
-pow(0, _, _):-!.
-pow(N, X, R):-N1 is N - 1, X1 is X, pow(N1, X1, R), R is X * X1.
-% It doesn't work
+pow(ResBottom, X, 1):-ResBottom is X.
+pow(Res, X, N):-N > 1, N1 is N - 1, pow(Res1, X, N1), Res is Res1 * X.
