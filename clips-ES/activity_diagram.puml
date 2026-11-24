@@ -1,0 +1,65 @@
+@startuml
+title UML Activity Diagram: Экспертная система диагностики заболеваний собак (CLIPS)
+
+|Пользователь|
+start
+:Запуск в CLIPS:\n(load "dog_expert.clp"), (reset), (run);
+
+|Рабочая память и БЗ (CLIPS)|
+:Очистка рабочей памяти ((reset)):\nзагрузка deffacts clinical-recommendations\n(20 рекомендаций AAHA / зооноз / диагностика);
+
+|Механизм вывода (CLIPS / Rete)|
+:Запуск правила system-banner (salience 500):\nвывод заголовка экспертной системы;
+:Инициализация прямого вывода\n(forward chaining) и наполнение агенды;
+
+while (Агенда (Agenda) не пуста?) is (да)
+  :Выбор активированного правила\nс наибольшим приоритетом (salience);
+
+  if (Тип выбранного правила?) then (Вывод синдрома / фактора риска / признака\n[salience 350])
+    |Рабочая память и БЗ (CLIPS)|
+    :assert (syndrome ...), (risk-factor ...)\nили (sign ...);
+    :Обновление сети Rete и агенды;
+  elseif (Постановка диагноза D1..D20\n[salience 320..301]) then
+    |Рабочая память и БЗ (CLIPS)|
+    :assert (diagnosis "<Заболевание>");
+    :Деактивация всех правил опроса\nза счёт условия (not (diagnosis ?));
+  elseif (Вывод результата\n[salience 400]) then
+    if (Факт (diagnosis unknown)?) then (да)
+      |Пользователь|
+      :Правило print-unknown-diagnosis:\nсообщение о невозможности определения\nи предупреждение о красных флагах;
+    else (нет)
+      |Рабочая память и БЗ (CLIPS)|
+      :Сопоставление (diagnosis ?disease)\nс (recommendation ?disease ...);
+      |Пользователь|
+      :Правило print-diagnosis:\nвывод диагноза, уровня срочности AAHA,\nпредупреждения о зоонозе и диагностики;
+    endif
+  elseif (Правило опроса determine-*\n[salience 200..72]) then
+    |Механизм вывода (CLIPS / Rete)|
+    :Вызов ask-symptom -> yes-or-no-p -> ask-question:\nвывод вопроса о симптоме (yes/no);
+
+    |Пользователь|
+    repeat
+      :Ввод ответа (yes / y / no / n);
+    repeat while (Ответ входит в (yes no y n) или EOF?) is (нет) not (да)
+
+    if (Получен EOF?) then (да)
+      |Механизм вывода (CLIPS / Rete)|
+      :Вывод "Ввод прерван." и (halt);
+      stop
+    else (нет)
+      |Рабочая память и БЗ (CLIPS)|
+      :assert (symptom <имя> yes|no);
+      :Обновление сети Rete и пересчёт агенды;
+    endif
+  else (Завершающее правило no-diagnosis\n[salience -10])
+    |Рабочая память и БЗ (CLIPS)|
+    :assert (diagnosis unknown);
+  endif
+endwhile (агенда пуста)
+
+|Пользователь|
+:Завершение сеанса диагностики\n(для повтора: (reset) и (run));
+stop
+
+@enduml
+

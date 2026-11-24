@@ -7,3 +7,5 @@ goal(N,L):-
     genl(3, K, L).
 
 final(Num, Res):- goal(5, L1), append(L1, [Num], Res).
+
+% final(5, Res).
